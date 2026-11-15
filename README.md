@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # AI-Assisted Child Development Platform — release v0.1
 
 **SENG 383 — Software Project III, Fall 2026** · M1–M4 working-scope implementation
@@ -98,3 +99,6 @@ seng383-child-development-v0.1/
 ## Attribution
 
 Produced with AI coding assistance; team members should review, test and understand the modules they own. The course assignment requires declaring AI assistance in the final report and submitting changes via reviewed pull requests.
+=======
+# BEEONCE
+>>>>>>> origin/main
