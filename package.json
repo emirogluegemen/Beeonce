@@ -1,0 +1,21 @@
+{
+  "name": "seng383-child-development-v01",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": ["server", "client"],
+  "engines": {"node": ">=22.13.0"},
+  "scripts": {
+    "dev": "concurrently -k -n API,WEB -c cyan,green \"npm run dev -w server\" \"npm run dev -w client\"",
+    "start": "npm run start -w server",
+    "seed": "npm run seed -w server",
+    "build": "npm run build -w client",
+    "test": "npm run test -w server && npm run test -w client",
+    "test:coverage": "npm run test:coverage -w server && npm run test:coverage -w client",
+    "test:e2e": "playwright test",
+    "check": "npm run test && npm run build"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.50.0",
+    "concurrently": "^9.1.2"
+  }
+}
