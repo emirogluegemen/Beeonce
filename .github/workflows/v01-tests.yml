@@ -1,0 +1,90 @@
+name: Beeonce v0.1 API and E2E tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  api-and-ui-tests:
+    name: API tests, UI unit tests, and frontend build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # The supplied v0.1 starter has no package-lock.json yet.
+      # After the team commits a lockfile, npm ci is preferable.
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Configure fictional test environment
+        run: cp .env.example server/.env
+
+      - name: API tests (Jest + Supertest, with coverage)
+        run: npm run test:coverage -w server
+
+      - name: Frontend unit tests (Vitest)
+        run: npm run test -w client
+
+      - name: Verify React production build
+        run: npm run build
+
+      - name: Upload API coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-coverage
+          path: coverage/server/
+          if-no-files-found: ignore
+
+  e2e-tests:
+    name: E2E browser tests (M1–M4)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Configure fictional test environment
+        run: cp .env.example server/.env
+
+      - name: Initialize synthetic SQLite database
+        run: npm run seed
+
+      - name: Install Playwright Chromium and Linux dependencies
+        run: npx playwright install --with-deps chromium
+
+      # playwright.config.js starts the Express API and Vite UI locally.
+      # The E2E global setup re-seeds the synthetic test database.
+      - name: Test M1 login, M2 linking, M3 schedule, M4 tasks
+        run: npm run test:e2e
+        env:
+          CI: 'true'
+
+      - name: Upload Playwright report and failure traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-failure-report
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
